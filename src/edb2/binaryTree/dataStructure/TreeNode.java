@@ -1,9 +1,11 @@
 package edb2.binaryTree.dataStructure;
 
-public class TreeNode<T extends TreeNodeDelegate<T>> {
+class TreeNode<T extends TreeNodeDelegate<T>> {
    private TreeNode<T> parent;
    private TreeNode<T> rightChild;
+
    private TreeNode<T> leftChild;
+
    private T data;
 
    public TreeNode() {
@@ -13,6 +15,22 @@ public class TreeNode<T extends TreeNodeDelegate<T>> {
    private TreeNode(TreeNode<T> parent, T data) {
       this.data = data;
       this.parent = parent;
+   }
+
+   public boolean isLeaf() {
+      return getLeftChild() == null && getRightChild() == null;
+   }
+
+   public boolean hasSingleSon() {
+      return getLeftChild() == null ^ getRightChild() == null;
+   }
+
+   public void removeLeftChild() {
+      this.leftChild = null;
+   }
+
+   public void removeRightChild() {
+      this.rightChild = null;
    }
 
    public void add(T value) {
@@ -44,11 +62,39 @@ public class TreeNode<T extends TreeNodeDelegate<T>> {
       }
    }
 
-   public void remove(int id) {
+   public boolean remove(int id) {
+      return remove(id, this) != null;
    }
 
-   private void remove(int id, TreeNode<T> node) {
-      
+   private TreeNode<T> remove(int id, TreeNode<T> node) {
+      if (node == null) {
+         return null;
+      }
+      var data = (TreeNodeDelegate<T>) node.getData();
+
+      if (data.getNodeId() > id) {
+         node.setLeftChild(remove(id, node.getLeftChild()));
+      } else if (data.getNodeId() < id) {
+         node.setRightChild(remove(id, node.getRightChild()));
+      } else {
+         if (node.isLeaf()) {
+            return null;
+         }
+
+         if (node.hasSingleSon()) {
+            if (node.getLeftChild() == null) {
+               return node.getRightChild();
+            } else if (node.getRightChild() == null) {
+               return node.getLeftChild();
+            }
+         }
+
+         var successor = node.getRightChild().min();
+         node.setData(successor.getData());
+         node.rightChild = remove(((TreeNodeDelegate<T>) successor.getData()).getNodeId(), node.getRightChild());
+      }
+
+      return node;
    }
 
    private void list(TreeNode<T> node) {
@@ -72,7 +118,7 @@ public class TreeNode<T extends TreeNodeDelegate<T>> {
       list(this);
    }
 
-   public T min() {
+   public TreeNode<T> min() {
       if (this.getData() == null) {
          return null;
       }
@@ -80,15 +126,15 @@ public class TreeNode<T extends TreeNodeDelegate<T>> {
       return min(this);
    }
 
-   private T min(TreeNode<T> node) {
+   private TreeNode<T> min(TreeNode<T> node) {
       if (node.getLeftChild() == null) {
-         return node.getData();
+         return node;
       } else {
          return min(node.getLeftChild());
       }
    }
 
-   public T max() {
+   public TreeNode<T> max() {
       if (this.getData() == null) {
          return null;
       }
@@ -96,9 +142,9 @@ public class TreeNode<T extends TreeNodeDelegate<T>> {
       return max(this);
    }
 
-   private T max(TreeNode<T> node) {
+   private TreeNode<T> max(TreeNode<T> node) {
       if (node.getRightChild() == null) {
-         return node.getData();
+         return node;
       } else {
          return max(node.getRightChild());
       }
@@ -109,11 +155,11 @@ public class TreeNode<T extends TreeNodeDelegate<T>> {
    }
 
    public T search(int id, TreeNode<T> node) {
-      var data = (TreeNodeDelegate<T>)node.getData();
+      var data = (TreeNodeDelegate<T>) node.getData();
 
       if (data.getNodeId() == id) {
          return node.getData();
-      } else if (data.getNodeId() > id){
+      } else if (data.getNodeId() > id) {
          if (node.getLeftChild() == null) {
             return null;
          }
@@ -142,7 +188,15 @@ public class TreeNode<T extends TreeNodeDelegate<T>> {
       return rightChild;
    }
 
+   public void setRightChild(TreeNode<T> rightChild) {
+      this.rightChild = rightChild;
+   }
+
    public TreeNode<T> getLeftChild() {
       return leftChild;
+   }
+
+   public void setLeftChild(TreeNode<T> leftChild) {
+      this.leftChild = leftChild;
    }
 }

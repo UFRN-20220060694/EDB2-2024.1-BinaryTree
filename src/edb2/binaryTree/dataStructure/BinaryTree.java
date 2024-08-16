@@ -9,26 +9,44 @@ public class BinaryTree<T extends TreeNodeDelegate<T>> {
    }
 
    public void add(T value) {
-     this.root.add(value);
+      this.root.add(value);
    }
 
-   public void remove(int id){
-      this.root.remove(id);
+   public boolean remove(int id) {
+      // Garante que se o nó for folha ele sempre terá um pai
+      if (root.isLeaf()) {
+         root = null;
+         return true;
+      }
+
+      return this.root.remove(id);
    }
 
-   public void list(){
-      this.root.list();
+   public void list() {
+      if (root != null) {
+         this.root.list();
+      }
    }
 
-   public T min(){
-      return this.root.min();
+   public T min() {
+      var min = this.root.min();
+      if (min == null) {
+         return null;
+      }
+
+      return min.getData();
    }
 
-   public T max(){
-      return this.root.max();
+   public T max() {
+      var max = this.root.max();
+      if (max == null) {
+         return null;
+      }
+
+      return max.getData();
    }
 
-   public T search(int id){
+   public T search(int id) {
       return this.root.search(id);
    }
 }
